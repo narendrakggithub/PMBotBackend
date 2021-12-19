@@ -13,8 +13,7 @@ public class SignupRequest {
     @Size(max = 50)
     @Email
     private String email;
-    
-    @NotBlank
+
     @Size(max = 50)
     @Email
     private String managerEmail;

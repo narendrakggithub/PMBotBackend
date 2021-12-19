@@ -4,6 +4,7 @@ public enum EGrade {
 	P,
 	PAT,
 	PT,
+	PA,
 	A,
 	SA,
 	CWR,

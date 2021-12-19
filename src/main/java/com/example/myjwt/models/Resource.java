@@ -53,7 +53,10 @@ public class Resource {
     @JoinColumn(name = "createdBy")
 	User createdBy;
 
-
+	public Resource() {
+		
+	}
+	
 	public Resource(Project project) {
 		this.project = project;
 	}

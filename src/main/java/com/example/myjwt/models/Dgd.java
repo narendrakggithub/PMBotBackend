@@ -26,6 +26,11 @@ public class Dgd {
     @JoinColumn(name = "createdBy")
 	User createdBy;
 
+	public Dgd() {
+		
+	}
+
+	
 	public Dgd(Project project) {
 		this.project = project;
 	}

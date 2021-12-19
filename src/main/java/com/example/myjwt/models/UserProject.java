@@ -33,7 +33,9 @@ public class UserProject {
     @JoinColumn(name = "createdBy")
 	User createdBy;
 	
+	public UserProject() {
 
+	}
 
 	public UserProject(User associate, User project) {
 		this.associate = associate;

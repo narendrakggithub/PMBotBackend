@@ -55,7 +55,10 @@ public class Action {
     @JoinColumn(name = "createdBy")
 	User createdBy;
 
+	public Action() {
 
+	}
+	
 	public Action(String actionDesc) {
 		this.actionDesc = actionDesc;
 	}

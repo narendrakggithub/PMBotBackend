@@ -135,6 +135,8 @@ public class AuthController {
 				.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 
 		user.setRole(userRole);
+		
+		System.out.println("signUpRequest.getManagerEmail()="+signUpRequest.getManagerEmail());
 
 		User manager = userRepository.findByEmail(signUpRequest.getManagerEmail());
 

@@ -26,6 +26,10 @@ public class Wsr {
     @JoinColumn(name = "createdBy")
 	User createdBy;
 
+	public Wsr() {
+		
+	}
+	
 	public Wsr(Project project) {
 		this.project = project;
 	}

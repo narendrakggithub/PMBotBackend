@@ -38,6 +38,10 @@ public class UserTimesheet {
     @JoinColumn(name = "updatedBy")
 	User updatedBy;
 	
+	public UserTimesheet() {
+
+	}
+	
 	public UserTimesheet(User associate, User project) {
 		this.associate = associate;
 		this.project = project;

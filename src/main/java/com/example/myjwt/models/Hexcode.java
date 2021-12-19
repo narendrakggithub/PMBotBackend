@@ -15,23 +15,27 @@ public class Hexcode {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@NotBlank
 	@Size(max = 50)
 	private String tableName;
-	
+
 	@NotBlank
 	@Size(max = 50)
 	private String action;
-	
+
 	@Size(max = 50)
 	private String subAction;
-	
+
 	@NotBlank
 	@Size(max = 100)
 	private String code;
-	
+
 	private Long refId;
+
+	public Hexcode() {
+
+	}
 
 	public Long getId() {
 		return id;

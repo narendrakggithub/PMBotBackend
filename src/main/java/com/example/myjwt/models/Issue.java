@@ -52,6 +52,9 @@ public class Issue {
     @JoinColumn(name = "createdBy")
 	User createdBy;
 
+	public Issue() {
+	
+	}
 
 	public Issue(String issueName) {
 		this.issueName = issueName;

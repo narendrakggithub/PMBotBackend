@@ -39,6 +39,7 @@ import com.example.myjwt.repo.RoleRepository;
 import com.example.myjwt.repo.UserRepository;
 import com.example.myjwt.security.jwt.JwtUtils;
 import com.example.myjwt.security.services.UserDetailsImpl;
+import com.example.myjwt.util.Constants;
 
 import net.bytebuddy.utility.RandomString;
 
@@ -146,11 +147,11 @@ public class AuthController {
 
 		user.setManager(manager);
 
-		userRepository.save(user);
-
 		// String siteURL = request.getRequestURL().toString();
-		String siteURL = "http://localhost:3000";
-		sendVerificationEmail(user, siteURL);
+		
+		sendVerificationEmail(user, Constants.UI_URL);
+		
+		userRepository.save(user);
 
 		return ResponseEntity
 				.ok(new MessageResponse("User registered successfully! Please verify the mail that has sent to you!!"));

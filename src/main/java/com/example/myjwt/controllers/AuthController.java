@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import com.example.myjwt.models.Hexcode;
 import com.example.myjwt.models.Role;
 import com.example.myjwt.models.User;
 import com.example.myjwt.models.enm.ERole;
@@ -35,6 +37,7 @@ import com.example.myjwt.payload.request.LoginRequest;
 import com.example.myjwt.payload.request.SignupRequest;
 import com.example.myjwt.payload.response.JwtResponse;
 import com.example.myjwt.payload.response.MessageResponse;
+import com.example.myjwt.repo.HexCodeRepository;
 import com.example.myjwt.repo.RoleRepository;
 import com.example.myjwt.repo.UserRepository;
 import com.example.myjwt.security.jwt.JwtUtils;
@@ -46,12 +49,16 @@ import net.bytebuddy.utility.RandomString;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/auth")
+
 public class AuthController {
 	@Autowired
 	AuthenticationManager authenticationManager;
 
 	@Autowired
 	UserRepository userRepository;
+
+	@Autowired
+	HexCodeRepository hexCodeRepository;
 
 	@Autowired
 	RoleRepository roleRepository;
@@ -78,8 +85,8 @@ public class AuthController {
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 
-		User user = userRepository.findByUserName(loginRequest.getUsername())
-				.orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + loginRequest.getUsername()));
+		User user = userRepository.findByUserName(loginRequest.getUsername()).orElseThrow(
+				() -> new UsernameNotFoundException("User Not Found with username: " + loginRequest.getUsername()));
 
 		boolean isabled = user.getIsVerified();
 
@@ -106,9 +113,7 @@ public class AuthController {
 
 		User user = new User();
 
-		String randomCode = RandomString.make(64);
-		user.setVerificationCode(randomCode);
-		System.out.println(user.getVerificationCode());
+		
 		user.setIsVerified(false);
 		user.setIsActive(false);
 		user.setIsApproved(false);
@@ -136,8 +141,8 @@ public class AuthController {
 				.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 
 		user.setRole(userRole);
-		
-		System.out.println("signUpRequest.getManagerEmail()="+signUpRequest.getManagerEmail());
+
+		System.out.println("signUpRequest.getManagerEmail()=" + signUpRequest.getManagerEmail());
 
 		User manager = userRepository.findByEmail(signUpRequest.getManagerEmail());
 
@@ -148,16 +153,30 @@ public class AuthController {
 		user.setManager(manager);
 
 		// String siteURL = request.getRequestURL().toString();
-		
-		sendVerificationEmail(user, Constants.UI_URL);
-		
-		userRepository.save(user);
+
+		Hexcode hexCode = new Hexcode();
+		hexCode.setTableName(Constants.TBL_USER);
+		hexCode.setAction(Constants.HEXCODE_ACTION_VALIDATE);
+		hexCode.setSubAction(Constants.HEXCODE_SUBACTION_EMAIL);
+		String randomCode = RandomString.make(64);
+		hexCode.setCode(randomCode);
+
+		registerTransaction(user, hexCode);
 
 		return ResponseEntity
 				.ok(new MessageResponse("User registered successfully! Please verify the mail that has sent to you!!"));
 	}
 
-	private void sendVerificationEmail(User user, String siteURL)
+	@Transactional
+	private void registerTransaction(User user, Hexcode hexCode)
+			throws UnsupportedEncodingException, MessagingException {
+		userRepository.save(user);
+		hexCode.setRefId(user.getId());
+		hexCodeRepository.save(hexCode);
+		sendVerificationEmail(user, Constants.UI_URL, hexCode.getCode());
+	}
+
+	private void sendVerificationEmail(User user, String siteURL, String hexCode)
 			throws MessagingException, UnsupportedEncodingException {
 		String toAddress = user.getEmail();
 		String fromAddress = "rapplicationdevelopment@gmail.com"; // ; password --> @DevTeam
@@ -174,7 +193,7 @@ public class AuthController {
 		helper.setSubject(subject);
 
 		content = content.replace("[[name]]", user.getUserName());
-		String verifyURL = siteURL + "/verify?code=" + user.getVerificationCode();
+		String verifyURL = siteURL + "/verify?code=" + hexCode;
 
 		content = content.replace("[[URL]]", verifyURL);
 

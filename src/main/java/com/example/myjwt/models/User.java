@@ -29,10 +29,6 @@ public class User {
 	@Size(max = 120)
 	private String password;
 
-	//@NotBlank
-	@Size(max = 64)
-	private String verificationCode;
-
 	private Boolean isVerified;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -58,7 +54,6 @@ public class User {
 		this.userName = userName;
 		this.email = email;
 		this.password = password;
-		this.verificationCode=verificationCode;
 		this.isVerified=isVerified;
 	}
 
@@ -92,14 +87,6 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public String getVerificationCode() {
-		return verificationCode;
-	}
-
-	public void setVerificationCode(String verificationCode) {
-		this.verificationCode = verificationCode;
 	}
 
 	public Boolean getIsVerified() {

@@ -6,17 +6,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import com.example.myjwt.models.Project;
 import com.example.myjwt.models.User;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-	Optional<User> findByUserName(String userName);
+public interface ProjectRepository extends JpaRepository<Project, Long> {
+	Optional<Project> findByProjectName(String projectName);
 	
-	User findByEmail(String email);
+	Boolean existsByProjectName(String projectName);
 
-
-	Boolean existsByUserName(String userName);
-
-	Boolean existsByEmail(String email);
 	
 }

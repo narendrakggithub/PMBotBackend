@@ -88,13 +88,17 @@ public class AuthController {
 		User user = userRepository.findByUserName(loginRequest.getUsername()).orElseThrow(
 				() -> new UsernameNotFoundException("User Not Found with username: " + loginRequest.getUsername()));
 
-		boolean isabled = user.getIsVerified();
-
-		System.out.println(isabled);
-
-		if (isabled) {
-			return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(),
-					userDetails.getEmail(), roles));
+		if (user.getIsVerified()) {
+			if (user.getIsApproved()) {
+				if (user.getIsActive()) {
+					return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(),
+							userDetails.getEmail(), roles));
+				} else {
+					return ResponseEntity.badRequest().body(new MessageResponse("Error: User not active"));
+				}
+			} else {
+				return ResponseEntity.badRequest().body(new MessageResponse("Error: Approval pending with manager"));
+			}
 		} else {
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: Account not verified"));
 		}
@@ -113,7 +117,6 @@ public class AuthController {
 
 		User user = new User();
 
-		
 		user.setIsVerified(false);
 		user.setIsActive(false);
 		user.setIsApproved(false);

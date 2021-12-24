@@ -1,14 +1,14 @@
 package com.example.myjwt.models;
 
-import java.sql.Date;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.example.myjwt.models.audit.UserDateAudit;
+
 @Entity
 @Table(name = "sbu")
-public class Sbu {
+public class Sbu extends UserDateAudit{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -16,12 +16,12 @@ public class Sbu {
 	@NotBlank
 	@Size(max = 20)
 	private String sbuName;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "sbuHeadId")
+	User sbuHead;
 
 	private Boolean isActive;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "createdBy")
-	User createdBy;
 
 	public Sbu() {
 
@@ -43,7 +43,7 @@ public class Sbu {
 		return sbuName;
 	}
 
-	public void setSbuName(String sbuname) {
+	public void setSbuName(String sbuName) {
 		this.sbuName = sbuName;
 	}
 
@@ -55,12 +55,11 @@ public class Sbu {
 		this.isActive = isActive;
 	}
 
-	public User getCreatedBy() {
-		return createdBy;
+	public User getSbuHead() {
+		return sbuHead;
 	}
 
-	public void setCreatedBy(User createdBy) {
-		this.createdBy = createdBy;
+	public void setSbuHead(User sbuHead) {
+		this.sbuHead = sbuHead;
 	}
-
 }

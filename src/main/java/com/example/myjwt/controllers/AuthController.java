@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import java.net.URI;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import com.example.myjwt.models.Hexcode;
@@ -35,14 +36,15 @@ import com.example.myjwt.models.User;
 import com.example.myjwt.models.enm.ERole;
 import com.example.myjwt.payload.request.LoginRequest;
 import com.example.myjwt.payload.request.SignupRequest;
-import com.example.myjwt.payload.response.JwtResponse;
-import com.example.myjwt.payload.response.MessageResponse;
+import com.example.myjwt.payload.response.JwtAuthenticationResponse;
+import com.example.myjwt.payload.response.ApiResponse;
 import com.example.myjwt.repo.HexCodeRepository;
 import com.example.myjwt.repo.RoleRepository;
 import com.example.myjwt.repo.UserRepository;
-import com.example.myjwt.security.jwt.JwtUtils;
-import com.example.myjwt.security.services.UserDetailsImpl;
-import com.example.myjwt.util.Constants;
+import com.example.myjwt.security.jwt.JwtTokenProvider;
+import com.example.myjwt.security.services.UserPrincipal;
+import com.example.myjwt.util.AppConstants;
+import com.example.myjwt.util.PMUtils;
 
 import net.bytebuddy.utility.RandomString;
 
@@ -64,55 +66,50 @@ public class AuthController {
 	RoleRepository roleRepository;
 
 	@Autowired
-	PasswordEncoder encoder;
+	PasswordEncoder passwordEncoder;
 
 	@Autowired
 	private JavaMailSender mailSender;
 
 	@Autowired
-	JwtUtils jwtUtils;
+	JwtTokenProvider tokenProvider;
 
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
 		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+				new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		String jwt = jwtUtils.generateJwtToken(authentication);
-
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-				.collect(Collectors.toList());
-
-		User user = userRepository.findByUserName(loginRequest.getUsername()).orElseThrow(
-				() -> new UsernameNotFoundException("User Not Found with username: " + loginRequest.getUsername()));
+		String jwt = tokenProvider.generateJwtToken(authentication);
+		
+		User user = userRepository.findByUserName(loginRequest.getUserName()).orElseThrow(
+				() -> new UsernameNotFoundException("User Not Found with username: " + loginRequest.getUserName()));
 
 		if (user.getIsVerified()) {
 			if (user.getIsApproved()) {
 				if (user.getIsActive()) {
-					return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(),
-							userDetails.getEmail(), roles));
+					return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
 				} else {
-					return ResponseEntity.badRequest().body(new MessageResponse("Error: User not active"));
+					return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: User not active"));
 				}
 			} else {
-				return ResponseEntity.badRequest().body(new MessageResponse("Error: Approval pending with manager"));
+				return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: Approval pending with manager"));
 			}
 		} else {
-			return ResponseEntity.badRequest().body(new MessageResponse("Error: Account not verified"));
+			return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: Email not verified"));
 		}
 	}
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest, HttpServletRequest request)
 			throws UnsupportedEncodingException, MessagingException {
-		if (userRepository.existsByUserName(signUpRequest.getUsername())) {
-			return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already exist!"));
+		if (userRepository.existsByUserName(signUpRequest.getUserName())) {
+			return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: Username is already exist!"));
 		}
 
 		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-			return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already exist!"));
+			return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: Email is already exist!"));
 		}
 
 		User user = new User();
@@ -121,9 +118,9 @@ public class AuthController {
 		user.setIsActive(false);
 		user.setIsApproved(false);
 
-		user.setUsername(signUpRequest.getUsername());
+		user.setUsername(signUpRequest.getUserName());
 		user.setEmail(signUpRequest.getEmail());
-		user.setPassword(encoder.encode(signUpRequest.getPassword()));
+		user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
 		/*
 		 * Set<String> strRoles = signUpRequest.getRole(); Set<Role> roles = new
@@ -150,7 +147,7 @@ public class AuthController {
 		User manager = userRepository.findByEmail(signUpRequest.getManagerEmail());
 
 		if (manager == null) {
-			return ResponseEntity.badRequest().body(new MessageResponse("Error: Manager email doesn't exist!"));
+			return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: Manager email doesn't exist!"));
 		}
 
 		user.setManager(manager);
@@ -158,25 +155,29 @@ public class AuthController {
 		// String siteURL = request.getRequestURL().toString();
 
 		Hexcode hexCode = new Hexcode();
-		hexCode.setTableName(Constants.TBL_USER);
-		hexCode.setAction(Constants.HEXCODE_ACTION_VALIDATE);
-		hexCode.setSubAction(Constants.HEXCODE_SUBACTION_EMAIL);
+		hexCode.setTableName(AppConstants.TBL_USER);
+		hexCode.setAction(AppConstants.HEXCODE_ACTION_VALIDATE);
+		hexCode.setSubAction(AppConstants.HEXCODE_SUBACTION_EMAIL);
 		String randomCode = RandomString.make(64);
 		hexCode.setCode(randomCode);
 
-		registerTransaction(user, hexCode);
+		User result = registerTransaction(user, hexCode);
+		
+		URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath().path("/api/users/{username}")
+                .buildAndExpand(result.getUserName()).toUri();
 
-		return ResponseEntity
-				.ok(new MessageResponse("User registered successfully! Please verify the mail that has sent to you!!"));
+		return ResponseEntity.created(location).body(new ApiResponse(true, "User registered successfully! Please verify the mail that has sent to you!!"));
 	}
 
 	@Transactional
-	private void registerTransaction(User user, Hexcode hexCode)
+	private User registerTransaction(User user, Hexcode hexCode)
 			throws UnsupportedEncodingException, MessagingException {
-		userRepository.save(user);
+		User result = userRepository.save(user);
 		hexCode.setRefId(user.getId());
 		hexCodeRepository.save(hexCode);
-		sendVerificationEmail(user, Constants.UI_URL, hexCode.getCode());
+		sendVerificationEmail(user, AppConstants.UI_URL, hexCode.getCode());
+		return result;
 	}
 
 	private void sendVerificationEmail(User user, String siteURL, String hexCode)

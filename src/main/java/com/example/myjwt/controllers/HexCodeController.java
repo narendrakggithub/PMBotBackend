@@ -17,7 +17,7 @@ import com.example.myjwt.models.Hexcode;
 import com.example.myjwt.models.User;
 import com.example.myjwt.repo.HexCodeRepository;
 import com.example.myjwt.repo.UserRepository;
-import com.example.myjwt.util.Constants;
+import com.example.myjwt.util.AppConstants;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController

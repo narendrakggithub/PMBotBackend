@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.example.myjwt.models.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class UserDetailsImpl implements UserDetails {
+public class UserPrincipal implements UserDetails {
 	private static final long serialVersionUID = 1L;
 
 	private Long id;
@@ -24,28 +24,32 @@ public class UserDetailsImpl implements UserDetails {
 
 	@JsonIgnore
 	private String password;
+	
+	private Long roleId;
 
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public UserDetailsImpl(Long id, String username, String email, String password,
+	public UserPrincipal(Long id, String username, String email, String password, Long roleId, 
 			Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.username = username;
 		this.email = email;
 		this.password = password;
 		this.authorities = authorities;
+		this.roleId = roleId;
 	}
 
-	public static UserDetailsImpl build(User user) {
+	public static UserPrincipal build(User user) {
 		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 		authorities.add(new SimpleGrantedAuthority(user.getRole().getName().name()));
 				
 
-		return new UserDetailsImpl(
+		return new UserPrincipal(
 				user.getId(), 
 				user.getUserName(), 
 				user.getEmail(),
 				user.getPassword(), 
+				user.getRole().getId(),
 				authorities);
 	}
 
@@ -99,7 +103,21 @@ public class UserDetailsImpl implements UserDetails {
 			return true;
 		if (o == null || getClass() != o.getClass())
 			return false;
-		UserDetailsImpl user = (UserDetailsImpl) o;
+		UserPrincipal user = (UserPrincipal) o;
 		return Objects.equals(id, user.id);
+	}
+	
+	@Override
+    public int hashCode() {
+
+        return Objects.hash(id);
+    }
+
+	public Long getRoleId() {
+		return roleId;
+	}
+
+	public void setRoleId(Long roleId) {
+		this.roleId = roleId;
 	}
 }

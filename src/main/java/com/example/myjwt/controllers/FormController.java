@@ -37,16 +37,16 @@ import com.example.myjwt.models.enm.ERole;
 import com.example.myjwt.payload.request.CreateProjectRequest;
 import com.example.myjwt.payload.request.LoginRequest;
 import com.example.myjwt.payload.request.SignupRequest;
-import com.example.myjwt.payload.response.JwtResponse;
-import com.example.myjwt.payload.response.MessageResponse;
+import com.example.myjwt.payload.response.JwtAuthenticationResponse;
+import com.example.myjwt.payload.response.ApiResponse;
 import com.example.myjwt.repo.HexCodeRepository;
 import com.example.myjwt.repo.ProjectRepository;
 import com.example.myjwt.repo.RoleRepository;
 import com.example.myjwt.repo.UserRepository;
-import com.example.myjwt.security.jwt.JwtUtils;
-import com.example.myjwt.security.services.UserDetailsImpl;
-import com.example.myjwt.security.services.UserDetailsServiceImpl;
-import com.example.myjwt.util.Constants;
+import com.example.myjwt.security.jwt.JwtTokenProvider;
+import com.example.myjwt.security.services.UserPrincipal;
+import com.example.myjwt.security.services.CustomUserDetailsService;
+import com.example.myjwt.util.AppConstants;
 import com.example.myjwt.util.PMUtils;
 
 import net.bytebuddy.utility.RandomString;
@@ -75,13 +75,13 @@ public class FormController {
 	PasswordEncoder encoder;
 	
 	@Autowired
-	private UserDetailsServiceImpl userDetailsService;
+	private CustomUserDetailsService userDetailsService;
 
 	@Autowired
 	private JavaMailSender mailSender;
 
 	@Autowired
-	JwtUtils jwtUtils;
+	JwtTokenProvider jwtUtils;
 
 	@PostMapping("/createproject")
 	public ResponseEntity<?> createProject(@Valid @RequestBody CreateProjectRequest createProjectRequest,
@@ -92,7 +92,7 @@ public class FormController {
 		System.out.println("userId--------------------------------------->:"+userId);
 
 		if (userId==null) {
-			return ResponseEntity.badRequest().body(new MessageResponse("User doesn't exist"));
+			return ResponseEntity.badRequest().body(new ApiResponse(false, "User doesn't exist"));
 		}
 
 		Project project = new Project();
@@ -116,6 +116,6 @@ public class FormController {
 		projectRepository.save(project);
 
 		return ResponseEntity
-				.ok(new MessageResponse("Project added successfully!"));
+				.ok(new ApiResponse(true, "Project added successfully!"));
 	}
 }

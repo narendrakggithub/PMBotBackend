@@ -15,23 +15,26 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.myjwt.security.jwt.AuthEntryPointJwt;
-import com.example.myjwt.security.jwt.AuthTokenFilter;
-import com.example.myjwt.security.services.UserDetailsServiceImpl;
+import com.example.myjwt.security.jwt.JwtAuthenticationFilter;
+import com.example.myjwt.security.services.CustomUserDetailsService;
+
+public class WebSecurityConfig /*extends WebSecurityConfigurerAdapter*/ {
+	/*@Autowired
+	CustomUserDetailsService userDetailsService;
+
+	@Autowired
+    private JwtAuthenticationEntryPoint unauthorizedHandler;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
-		prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-	@Autowired
-	UserDetailsServiceImpl userDetailsService;
-
-	@Autowired
-	private AuthEntryPointJwt unauthorizedHandler;
+		securedEnabled = true,
+        jsr250Enabled = true,
+        prePostEnabled = true)
 
 	@Bean
-	public AuthTokenFilter authenticationJwtTokenFilter() {
-		return new AuthTokenFilter();
+	public JwtAuthenticationFilter authenticationJwtTokenFilter() {
+		return new JwtAuthenticationFilter();
 	}
 
 	@Override
@@ -60,5 +63,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.anyRequest().authenticated();
 
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-	}
+	}*/
 }

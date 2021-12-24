@@ -1,6 +1,6 @@
 package com.example.myjwt.util;
 
-public interface Constants {
+public interface AppConstants {
 
 	String UI_URL = "http://localhost:3000";
 	String TBL_USER = "USER";

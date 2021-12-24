@@ -18,7 +18,7 @@ import com.example.myjwt.models.Hexcode;
 import com.example.myjwt.models.User;
 import com.example.myjwt.repo.HexCodeRepository;
 import com.example.myjwt.repo.UserRepository;
-import com.example.myjwt.util.Constants;
+import com.example.myjwt.util.AppConstants;
 
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -53,11 +53,11 @@ public class WelcomeController {
 		} else {
 
 			switch (hexCode.getTableName()) {
-			case Constants.TBL_USER:
+			case AppConstants.TBL_USER:
 				switch (hexCode.getAction()) {
-				case Constants.HEXCODE_ACTION_VALIDATE:
+				case AppConstants.HEXCODE_ACTION_VALIDATE:
 					switch (hexCode.getSubAction()) {
-					case Constants.HEXCODE_SUBACTION_EMAIL:
+					case AppConstants.HEXCODE_SUBACTION_EMAIL:
 
 						User user = userRepository.findById(hexCode.getRefId())
 								.orElseThrow(() -> new UsernameNotFoundException("User Not Found"));

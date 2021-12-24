@@ -11,7 +11,7 @@ import com.example.myjwt.models.User;
 import com.example.myjwt.repo.UserRepository;
 
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 	@Autowired
 	UserRepository userRepository;
 
@@ -21,7 +21,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		User user = userRepository.findByUserName(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
 
-		return UserDetailsImpl.build(user);
+		return UserPrincipal.build(user);
 	}
 
+	@Transactional
+	public UserDetails loadUserById(Long id) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new UsernameNotFoundException("User not found with id : " + id));
+
+		return UserPrincipal.build(user);
+	}
 }

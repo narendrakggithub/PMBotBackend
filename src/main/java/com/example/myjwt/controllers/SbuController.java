@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -39,9 +40,9 @@ public class SbuController {
 
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
-    private SbuService sbuService;
+	private SbuService sbuService;
 
 	private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
@@ -62,8 +63,21 @@ public class SbuController {
 		sbu.setSbuName(createSbuRequest.getSbuName());
 		sbu.setIsActive(true);
 
-		Sbu result = sbuRepository.save(sbu);
+		List<Long> eligibleGrades = PMUtils.getSBUHeadEligibleGrades();
+		Boolean isAvailable = userRepository
+				.findByUserNameAndGradeIds(createSbuRequest.getSbuHeadUserName(), eligibleGrades).size() > 0;
 
+		if (isAvailable) {
+			User sbuHead = userRepository.findByUserName(createSbuRequest.getSbuHeadUserName())
+					.orElseThrow(() -> new UsernameNotFoundException(
+							"SBU head not Found with userName: " + createSbuRequest.getSbuHeadUserName()));
+			sbu.setSbuHead(sbuHead);
+			
+		} else {
+			return ResponseEntity.badRequest().body(new ApiResponse(false, "SBU head selected is not eligible for this role!"));
+		}
+
+		Sbu result = sbuRepository.save(sbu);
 		URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
 				.path("/api/sbu/{createSbuRequest.getSbuName()}").buildAndExpand(result.getSbuName()).toUri();
 
@@ -73,13 +87,15 @@ public class SbuController {
 	@GetMapping("/checkSBUHeadAvailability")
 	public UserIdentityAvailability checkSBUHeadAvailability(
 			@RequestParam(value = "sbuHeadUserName") String sbuHeadUserName) {
+
+		System.out.println("sbuHeadUserName = " + sbuHeadUserName);
 		List<Long> eligibleGrades = PMUtils.getSBUHeadEligibleGrades();
-		Boolean isAvailable = userRepository.findByUserNameAndGradeIds(sbuHeadUserName, eligibleGrades)
-				.size() > 0;
-			
+		Boolean isAvailable = userRepository.findByUserNameAndGradeIds(sbuHeadUserName, eligibleGrades).size() > 0;
+
+		System.out.println("isAvailable:" + isAvailable);
 		return new UserIdentityAvailability(isAvailable);
 	}
-	
+
 	@GetMapping("/getEligibleSBUHeads")
 	public List<UserListItem> getEligibleSBUHeads() {
 		return sbuService.getEligibleSbuHeads();

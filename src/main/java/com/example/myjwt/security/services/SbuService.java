@@ -35,6 +35,7 @@ public class SbuService {
 			User user = listUsers.get(i);
 			listItem.setId(user.getId());
 			listItem.setUserName(user.getUserName());
+			listItem.setUserFullName(user.getFullName());
 			listItem.setGrade(user.getGrade().getName().name());
 			eligibleSbuHeads.add(listItem);
 		}

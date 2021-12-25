@@ -117,8 +117,8 @@ public class AuthController {
 		user.setIsVerified(false);
 		user.setIsActive(false);
 		user.setIsApproved(false);
-
-		user.setUsername(signUpRequest.getUserName());
+		user.setFullName(signUpRequest.getFullName());
+		user.setUserName(signUpRequest.getUserName());
 		user.setEmail(signUpRequest.getEmail());
 		user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 

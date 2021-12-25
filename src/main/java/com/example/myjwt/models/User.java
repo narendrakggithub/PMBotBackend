@@ -24,7 +24,10 @@ public class User extends DateAudit {
 
 	@NotBlank
 	@Size(max = 50)
-	@Email
+	private String fullName;
+	
+	@NotBlank
+	@Size(max = 50)
 	private String email;
 
 	@NotBlank
@@ -71,7 +74,7 @@ public class User extends DateAudit {
 		return userName;
 	}
 
-	public void setUsername(String userName) {
+	public void setUserName(String userName) {
 		this.userName = userName;
 	}
 
@@ -140,6 +143,14 @@ public class User extends DateAudit {
 
 	public void setGrade(Grade grade) {
 		this.grade = grade;
+	}
+
+	public String getFullName() {
+		return fullName;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
 	}
 
 	

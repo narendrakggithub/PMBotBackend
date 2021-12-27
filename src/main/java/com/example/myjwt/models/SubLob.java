@@ -6,9 +6,11 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.example.myjwt.models.audit.UserDateAudit;
+
 @Entity
 @Table(name = "sublob")
-public class SubLob {
+public class SubLob extends UserDateAudit{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -27,9 +29,6 @@ public class SubLob {
 	@JoinColumn(name = "ownerId")
 	User owner;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "createdBy")
-	User createdBy;
 
 	public SubLob() {
 
@@ -79,13 +78,7 @@ public class SubLob {
 		this.owner = owner;
 	}
 
-	public User getCreatedBy() {
-		return createdBy;
-	}
 
-	public void setCreatedBy(User createdBy) {
-		this.createdBy = createdBy;
-	}
 
 
 

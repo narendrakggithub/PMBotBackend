@@ -2,6 +2,7 @@ package com.example.myjwt.models;
 
 import javax.persistence.*;
 
+import com.example.myjwt.models.audit.UserDateAudit;
 import com.example.myjwt.models.enm.EGrade;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -9,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 @Entity
 @Table(name = "grade")
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
-public class Grade {
+public class Grade extends UserDateAudit{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

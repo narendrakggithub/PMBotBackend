@@ -6,11 +6,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.example.myjwt.models.audit.UserDateAudit;
 import com.example.myjwt.models.enm.EServiceLine;
 
 @Entity
 @Table(name = "action")
-public class Action {
+public class Action extends UserDateAudit{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -42,18 +43,6 @@ public class Action {
 	private String remarks;
 	
 	private Boolean isActive;
-	
-	@NotBlank
-	private Date updatedOn;
-	
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updatedBy")
-	User updatedBy;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "createdBy")
-	User createdBy;
 
 	public Action() {
 
@@ -151,36 +140,6 @@ public class Action {
 
 	public void setIsActive(Boolean isActive) {
 		this.isActive = isActive;
-	}
-
-
-	public Date getUpdatedOn() {
-		return updatedOn;
-	}
-
-
-	public void setUpdatedOn(Date updatedOn) {
-		this.updatedOn = updatedOn;
-	}
-
-
-	public User getUpdatedBy() {
-		return updatedBy;
-	}
-
-
-	public void setUpdatedBy(User updatedBy) {
-		this.updatedBy = updatedBy;
-	}
-
-
-	public User getCreatedBy() {
-		return createdBy;
-	}
-
-
-	public void setCreatedBy(User createdBy) {
-		this.createdBy = createdBy;
 	}
 
 

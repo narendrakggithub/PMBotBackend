@@ -7,10 +7,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import com.example.myjwt.models.Lob;
+import com.example.myjwt.models.audit.UserDateAudit;
 
 @Entity
 @Table(name = "projectstatus")
-public class ProjectStatus {
+public class ProjectStatus extends UserDateAudit{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

@@ -2,11 +2,12 @@ package com.example.myjwt.models;
 
 import javax.persistence.*;
 
+import com.example.myjwt.models.audit.UserDateAudit;
 import com.example.myjwt.models.enm.EServiceLine;
 
 @Entity
 @Table(name = "serviceline")
-public class ServiceLine {
+public class ServiceLine extends UserDateAudit{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

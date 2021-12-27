@@ -6,11 +6,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.example.myjwt.models.audit.UserDateAudit;
 import com.example.myjwt.models.enm.EServiceLine;
 
 @Entity
 @Table(name = "project")
-public class Project {
+public class Project extends UserDateAudit{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -26,10 +27,7 @@ public class Project {
 	private Date endDate;
 	
 	private Boolean isActive;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "createdBy")
-	User createdBy;
+
 	
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pmId")
@@ -84,13 +82,6 @@ public class Project {
 		this.isActive = isActive;
 	}
 
-	public User getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(User createdBy) {
-		this.createdBy = createdBy;
-	}
 
 	public User getProjectManager() {
 		return projectManager;

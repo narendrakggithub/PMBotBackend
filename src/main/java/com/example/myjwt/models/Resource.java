@@ -6,11 +6,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.example.myjwt.models.audit.UserDateAudit;
 import com.example.myjwt.models.enm.EServiceLine;
 
 @Entity
 @Table(name = "resource")
-public class Resource {
+public class Resource extends UserDateAudit{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -48,10 +49,7 @@ public class Resource {
 	private Date tentativeStartDate;
 	
 	private Boolean isActive;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "createdBy")
-	User createdBy;
+
 
 	public Resource() {
 		
@@ -182,13 +180,5 @@ public class Resource {
 	}
 
 
-	public User getCreatedBy() {
-		return createdBy;
-	}
-
-
-	public void setCreatedBy(User createdBy) {
-		this.createdBy = createdBy;
-	}
 
 }

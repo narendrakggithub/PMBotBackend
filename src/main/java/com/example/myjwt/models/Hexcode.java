@@ -8,9 +8,11 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.example.myjwt.models.audit.UserDateAudit;
+
 @Entity
 @Table(name = "hexcode")
-public class Hexcode {
+public class Hexcode extends UserDateAudit {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

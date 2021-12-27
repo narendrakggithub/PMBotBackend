@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -28,12 +29,13 @@ import com.example.myjwt.payload.response.ApiResponse;
 import com.example.myjwt.repo.SbuRepository;
 import com.example.myjwt.repo.UserRepository;
 import com.example.myjwt.security.services.SbuService;
+import com.example.myjwt.security.services.UserPrincipal;
 import com.example.myjwt.util.PMUtils;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/sbu")
-public class SbuController {
+public class SbuController extends BaseController {
 
 	@Autowired
 	private SbuRepository sbuRepository;
@@ -99,6 +101,11 @@ public class SbuController {
 	@GetMapping("/getEligibleSBUHeads")
 	public List<UserListItem> getEligibleSBUHeads() {
 		return sbuService.getEligibleSbuHeads();
+	}
+	
+	@GetMapping("/getAllSBUNamesOwnedByUser")
+	public List<Sbu> getAllSBUNamesOwnedByUser() {
+		return sbuService.getAllSbuOwnedByUser(getCurrentUserId());
 	}
 
 }

@@ -20,9 +20,9 @@ import com.example.myjwt.security.services.UserPrincipal;
 import com.example.myjwt.security.services.CustomUserDetailsService;
 
 public class PMUtils {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(PMUtils.class);
-	
+
 	public static String parseJwt(HttpServletRequest request) {
 		String headerAuth = request.getHeader("Authorization");
 
@@ -33,30 +33,51 @@ public class PMUtils {
 		return null;
 	}
 
-	public static Long getUserIdFromRequest(HttpServletRequest request, JwtTokenProvider jwtUtils, CustomUserDetailsService userDetailsService) {
+	public static Long getUserIdFromRequest(HttpServletRequest request, JwtTokenProvider jwtUtils,
+			CustomUserDetailsService userDetailsService) {
 		try {
 			String jwt = PMUtils.parseJwt(request);
 			if (jwt != null && jwtUtils.validateToken(jwt)) {
 				String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
-				UserPrincipal userDetails = (UserPrincipal)userDetailsService.loadUserByUsername(username);
+				UserPrincipal userDetails = (UserPrincipal) userDetailsService.loadUserByUsername(username);
 				return userDetails.getId();
 			}
 		} catch (Exception e) {
 			logger.error("Cannot set user authentication: {}", e);
-			
+
 		}
 		return null;
 	}
-	
+
 	public static List<Long> getSBUHeadEligibleGrades() {
 		List<Long> eligibleGrades = new ArrayList<Long>();
-		
-		eligibleGrades.add(Long.valueOf(EGrade.SVP.ordinal()+1));
-		eligibleGrades.add(Long.valueOf(EGrade.VP.ordinal()+1));
-		eligibleGrades.add(Long.valueOf(EGrade.AVP.ordinal()+1));
-		eligibleGrades.add(Long.valueOf(EGrade.SD.ordinal()+1));
-		eligibleGrades.add(Long.valueOf(EGrade.D.ordinal()+1));
+
+		eligibleGrades.add(Long.valueOf(EGrade.SVP.ordinal() + 1));
+		eligibleGrades.add(Long.valueOf(EGrade.VP.ordinal() + 1));
+		eligibleGrades.add(Long.valueOf(EGrade.AVP.ordinal() + 1));
+		eligibleGrades.add(Long.valueOf(EGrade.SD.ordinal() + 1));
+		eligibleGrades.add(Long.valueOf(EGrade.D.ordinal() + 1));
+
+		return eligibleGrades;
+	}
+
+	public static List<Long> getPDLEligibleGrades() {
+		List<Long> eligibleGrades = new ArrayList<Long>();
+		eligibleGrades.add(Long.valueOf(EGrade.AVP.ordinal() + 1));
+		eligibleGrades.add(Long.valueOf(EGrade.SD.ordinal() + 1));
+		eligibleGrades.add(Long.valueOf(EGrade.D.ordinal() + 1));
+		eligibleGrades.add(Long.valueOf(EGrade.AD.ordinal() + 1));
+
+		return eligibleGrades;
+	}
+
+	public static List<Long> getEDLEligibleGrades() {
+		List<Long> eligibleGrades = new ArrayList<Long>();
+
+		eligibleGrades.add(Long.valueOf(EGrade.D.ordinal() + 1));
+		eligibleGrades.add(Long.valueOf(EGrade.AD.ordinal() + 1));
+		eligibleGrades.add(Long.valueOf(EGrade.SM.ordinal() + 1));
 
 		return eligibleGrades;
 	}

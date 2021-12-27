@@ -1,5 +1,6 @@
 package com.example.myjwt.payload;
 
+import com.example.myjwt.models.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.Instant;
@@ -12,6 +13,14 @@ public class UserListItem {
 	private String userFullName;
 	private String accountName;
 	private String projectName;
+	
+	
+	public UserListItem(User user) {
+		this.id = user.getId();
+		this.userName = user.getUserName();
+		this.userFullName = user.getFullName();
+		this.grade = user.getGrade().getName().name();
+	}
 	
 	public Long getId() {
 		return id;

@@ -1,6 +1,7 @@
 package com.example.myjwt.payload;
 
 import com.example.myjwt.models.User;
+import com.example.myjwt.models.enm.EGrade;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.Instant;
@@ -25,8 +26,11 @@ public class UserListItem {
 	public UserListItem(NativeQueryUser user) {
 		this.id = user.getId();
 		this.userName = user.getUserName();
+		this.userFullName = user.getFullName();
+		int index = (int)(user.getGradeId()).longValue();
+		this.grade = (EGrade.values()[index-1]).name();
 	}
-
+	
 	public Long getId() {
 		return id;
 	}

@@ -1,5 +1,8 @@
 package com.example.myjwt.util;
 
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,5 +83,17 @@ public class PMUtils {
 		eligibleGrades.add(Long.valueOf(EGrade.SM.ordinal() + 1));
 
 		return eligibleGrades;
+	}
+	
+	public static Date stringToSQLDate(String strDate)  { //2021-12-20 20:22:51
+		java.sql.Date sqlStartDate = null;
+		try {
+			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			java.util.Date date = sdf1.parse(strDate);
+			sqlStartDate = new java.sql.Date(date.getTime());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return sqlStartDate;
 	}
 }

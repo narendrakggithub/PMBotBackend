@@ -35,8 +35,8 @@ public class UserService {
 		List<NativeQueryUser> allReportees = new ArrayList<NativeQueryUser>();
 		List<Object[]> reportees = userRepository.getAllUserUnderManagerWithId(managerId);
 
-		for (Object[] a : reportees) {
-			allReportees.add(reporteeArrayToNativeQueryUser(a));
+		for (Object[] arr : reportees) {
+			allReportees.add(new NativeQueryUser(arr));
 		}
 
 		return allReportees;
@@ -53,13 +53,5 @@ public class UserService {
 			}
 		}
 		return isAvailable;
-	}
-
-	public NativeQueryUser reporteeArrayToNativeQueryUser(Object[] array) {
-		NativeQueryUser nativeQueryUser = new NativeQueryUser();
-		nativeQueryUser.setId(Long.parseLong(array[0].toString()));
-		nativeQueryUser.setUserName(array[1].toString());
-		nativeQueryUser.setManagerId(Long.parseLong(array[2].toString()));
-		return nativeQueryUser;
 	}
 }

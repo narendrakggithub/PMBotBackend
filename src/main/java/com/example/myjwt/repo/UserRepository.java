@@ -40,6 +40,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query("SELECT v FROM User v where v.manager.id=:userId and v.userName=:userName and v.grade.id in :gradeIds")
 	List<User> getUserWithGradeOwnedByCurrentUser(Long userId, String userName, List<Long> gradeIds);
 
-	@Query(value = "WITH RECURSIVE subordinate AS (SELECT  id, user_name, manager_id, 0 AS level FROM user WHERE manager_id=:managerId UNION ALL SELECT e.id, e.user_name, e.manager_id, level + 1 FROM user e JOIN subordinate s ON e.manager_id = s.id) SELECT  s.id, s.user_name AS subordinate_first_name, m.id AS direct_superior_id, m.user_name AS direct_superior_first_name, s.level FROM subordinate s JOIN user m ON s.manager_id = m.id ORDER BY level", nativeQuery = true)
+	@Query(value = "WITH RECURSIVE subordinate AS (SELECT  id, created_at, updated_at, email, full_name, is_active, is_approved, is_verified, password, "+
+			"user_name, grade_id, manager_id, roleid, 0 AS level FROM user WHERE manager_id=:managerId "+
+			"UNION ALL "+
+			"SELECT e.id, e.created_at, e.updated_at, e.email, e.full_name, e.is_active, e.is_approved, e.is_verified, e.password, "+
+			"e.user_name, e.grade_id, e.manager_id, e.roleid, level + 1 FROM user e JOIN subordinate s ON e.manager_id = s.id) "+
+			"SELECT s.id, s.created_at, s.updated_at, s.email, s.full_name, s.is_active, s.is_approved, s.is_verified, s.password, s.user_name, s.grade_id, s.manager_id, s.roleid "+
+			"FROM subordinate s JOIN user m ON s.manager_id = m.id ORDER BY level", nativeQuery = true)
 	List<Object[]> getAllUserUnderManagerWithId(Long managerId);
 }

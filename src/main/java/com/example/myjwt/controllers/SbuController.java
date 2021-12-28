@@ -21,6 +21,7 @@ import com.example.myjwt.models.Sbu;
 import com.example.myjwt.models.User;
 import com.example.myjwt.payload.IdentityAvailability;
 import com.example.myjwt.payload.ListResponse;
+import com.example.myjwt.payload.NativeQueryUser;
 import com.example.myjwt.payload.UserIdentityAvailability;
 import com.example.myjwt.payload.UserListItem;
 import com.example.myjwt.payload.request.CreateSbuRequest;
@@ -30,6 +31,7 @@ import com.example.myjwt.repo.SbuRepository;
 import com.example.myjwt.repo.UserRepository;
 import com.example.myjwt.security.services.SbuService;
 import com.example.myjwt.security.services.UserPrincipal;
+import com.example.myjwt.security.services.UserService;
 import com.example.myjwt.util.PMUtils;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -45,6 +47,9 @@ public class SbuController extends BaseController {
 
 	@Autowired
 	private SbuService sbuService;
+
+	@Autowired
+	private UserService userService;
 
 	private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
@@ -74,9 +79,10 @@ public class SbuController extends BaseController {
 					.orElseThrow(() -> new UsernameNotFoundException(
 							"SBU head not Found with userName: " + createSbuRequest.getSbuHeadUserName()));
 			sbu.setSbuHead(sbuHead);
-			
+
 		} else {
-			return ResponseEntity.badRequest().body(new ApiResponse(false, "SBU head selected is not eligible for this role!"));
+			return ResponseEntity.badRequest()
+					.body(new ApiResponse(false, "SBU head selected is not eligible for this role!"));
 		}
 
 		Sbu result = sbuRepository.save(sbu);
@@ -100,9 +106,22 @@ public class SbuController extends BaseController {
 
 	@GetMapping("/getEligibleSBUHeads")
 	public List<UserListItem> getEligibleSBUHeads() {
-		return sbuService.getEligibleSbuHeads();
+
+		List<NativeQueryUser> allReportees = userService.getAllReporteesOf(getCurrentUserId());
+
+		List<Long> eligibleGrades = PMUtils.getSBUHeadEligibleGrades();
+		List<UserListItem> eligibleSbuHeads = new ArrayList<UserListItem>();
+
+		for (NativeQueryUser nativeQueryUser : allReportees) {
+			if (eligibleGrades.contains(nativeQueryUser.getGradeId())) {
+				UserListItem listItem = new UserListItem(nativeQueryUser);
+				eligibleSbuHeads.add(listItem);
+			}
+		}
+
+		return eligibleSbuHeads;
 	}
-	
+
 	@GetMapping("/getAllSBUNamesOwnedByUser")
 	public List<Sbu> getAllSBUNamesOwnedByUser() {
 		return sbuService.getAllSbuOwnedByUser(getCurrentUserId());

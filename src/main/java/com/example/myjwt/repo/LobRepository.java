@@ -15,7 +15,7 @@ import com.example.myjwt.models.User;
 public interface LobRepository extends JpaRepository<Lob, Long> {
 	Optional<Lob> findByLobName(String lobName);
 	
-	Boolean existsByLobName(String lobName);
+	Boolean existsByLobNameAndAccountId(String lobName, Long accountId);
 
 	
 }

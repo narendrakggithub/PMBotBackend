@@ -29,9 +29,6 @@ public class Action extends UserDateAudit{
 	User owner;
 	
 	@NotBlank
-	private Date createDate;
-	
-	@NotBlank
 	private Date eta;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -91,17 +88,6 @@ public class Action extends UserDateAudit{
 	public void setOwner(User owner) {
 		this.owner = owner;
 	}
-
-
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
-
 
 	public Date getEta() {
 		return eta;

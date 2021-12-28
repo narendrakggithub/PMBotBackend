@@ -21,6 +21,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	Boolean existsByEmail(String email);
 
+	List<User> findByManagerId(Long managerId);
+
 	// TODO: Remove native queries
 
 	@Query(value = "SELECT * FROM user v where v.grade_id in :gradeIds", nativeQuery = true)
@@ -37,4 +39,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	// TODO: Remove native queries
 	@Query("SELECT v FROM User v where v.manager.id=:userId and v.userName=:userName and v.grade.id in :gradeIds")
 	List<User> getUserWithGradeOwnedByCurrentUser(Long userId, String userName, List<Long> gradeIds);
+
+	@Query(value = "WITH RECURSIVE subordinate AS (SELECT  id, user_name, manager_id, 0 AS level FROM user WHERE manager_id=:managerId UNION ALL SELECT e.id, e.user_name, e.manager_id, level + 1 FROM user e JOIN subordinate s ON e.manager_id = s.id) SELECT  s.id, s.user_name AS subordinate_first_name, m.id AS direct_superior_id, m.user_name AS direct_superior_first_name, s.level FROM subordinate s JOIN user m ON s.manager_id = m.id ORDER BY level", nativeQuery = true)
+	List<Object[]> getAllUserUnderManagerWithId(Long managerId);
 }

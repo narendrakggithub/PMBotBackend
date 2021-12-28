@@ -14,6 +14,7 @@ import com.example.myjwt.exception.ResourceNotFoundException;
 import com.example.myjwt.models.User;
 import com.example.myjwt.payload.IdentityAvailability;
 import com.example.myjwt.payload.IdentityExists;
+import com.example.myjwt.payload.NativeQueryUser;
 import com.example.myjwt.payload.UserIdentityAvailability;
 import com.example.myjwt.payload.UserListItem;
 import com.example.myjwt.payload.UserProfile;
@@ -22,6 +23,7 @@ import com.example.myjwt.repo.SbuRepository;
 import com.example.myjwt.repo.UserRepository;
 import com.example.myjwt.security.CurrentUser;
 import com.example.myjwt.security.services.UserPrincipal;
+import com.example.myjwt.security.services.UserService;
 import com.example.myjwt.util.PMUtils;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -31,6 +33,9 @@ public class UserController extends BaseController {
 
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private UserService userService;
 	
 	@Autowired
 	private SbuRepository sbuRepository;
@@ -94,6 +99,28 @@ public class UserController extends BaseController {
 		Boolean isAvailable = userRepository.getUserWithGradeOwnedByCurrentUser(getCurrentUserId(), edlUserName,
 				eligibleGrades).size()>0;
 		return new IdentityExists(isAvailable);
+	}
+	
+	@GetMapping("/user/confirmLobLeadExistenceForUser")
+	public IdentityExists confirmLobLeadExistenceForUser(@RequestParam(value = "lobLeadId") Long lobLeadId) {
+		System.out.println("confirmLobLeadExistenceForUser lobLeadId ----------------------- > "+lobLeadId+":"+getCurrentUserId());
+		Boolean isAvailable = userService.isUserReportingToManager(lobLeadId, getCurrentUserId());
+		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > "+isAvailable);
+		return new IdentityExists(isAvailable);
+	}
+	
+	@GetMapping("/user/getAllReporteesOfCurrentUser")
+	public List<UserListItem> getAllReporteesOfCurrentUser() {
+		List<UserListItem> userList = new ArrayList<UserListItem>();
+		List<NativeQueryUser> allReportees = userService.getAllReporteesOf(getCurrentUserId());
+		
+		for (int i = 0; i < allReportees.size(); i++) {
+			userList.add(new UserListItem(allReportees.get(i)));
+		}
+		System.out.println("getAllReporteesOfCurrentUser userList size----------------------- > "+userList.size());
+		System.out.println("getAllReporteesOfCurrentUser userList ----------------------- > "+userList);
+
+		return userList;
 	}
 
 	// select managerID, group_concat(userID) from hierarchy group by managerID ;

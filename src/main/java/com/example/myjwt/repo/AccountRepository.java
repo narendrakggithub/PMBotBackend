@@ -1,5 +1,6 @@
 package com.example.myjwt.repo;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,9 +14,18 @@ import com.example.myjwt.models.User;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
+	
+	Optional<Account> findById(Long id);
+	
+	Optional<Account> findByIdAndEdlId(Long id, Long edlId);
+	
 	Optional<Account> findByAccountName(String accountName);
 	
 	Boolean existsByAccountName(String accountName);
+	
+	List<Account> findByEdlId(Long edlId);
+	
+	Boolean existsByIdAndEdlId(Long id, Long edlId);
 
 	
 }

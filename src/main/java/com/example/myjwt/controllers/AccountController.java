@@ -49,6 +49,30 @@ public class AccountController extends BaseController{
 		return new IdentityAvailability(isAvailable);
 	}
 	
+	@GetMapping("/account/confirmAccountIdExistenceForUser")
+	public IdentityAvailability confirmAccountIdExistenceForUser(@RequestParam(value = "accountId") Long accountId) {
+		
+		Long currentUserId = getCurrentUserId();
+		
+		Boolean isAvailable = accountRepository.existsByIdAndEdlId(accountId, currentUserId);
+		
+		System.out.println("confirmAccountIdExistenceForUser isAvailable ----------------------- > "+isAvailable);
+		
+		return new IdentityAvailability(isAvailable);
+	}
+	
+	@GetMapping("/account/getAllAccountsOwnedByUser")
+	public List<Account> getAllAccountsOwnedByUser() {
+		
+		Long currentUserId = getCurrentUserId();
+		
+		List<Account> accounts = accountRepository.findByEdlId(currentUserId);
+		
+		System.out.println("accounts  ----------------------- > "+accounts);
+		
+		return accounts;
+	}
+	
 	@PostMapping("/account/createAccount")
 	public ResponseEntity<?> createAccount(@Valid @RequestBody CreateAccountRequest createAccountRequest,
 			HttpServletRequest request) {

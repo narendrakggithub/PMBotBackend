@@ -104,7 +104,6 @@ public class FormController {
 		User projectManager = userRepository.findByUserName(createProjectRequest.getPmName()).orElseThrow(
 				() -> new UsernameNotFoundException("Project Manager Not Found with name: " + createProjectRequest.getPmName()));
 		
-		project.setCreatedBy(user);
 		project.setCustomer(null);
 		project.setEndDate(createProjectRequest.getEndDate());
 		project.setIsActive(true);

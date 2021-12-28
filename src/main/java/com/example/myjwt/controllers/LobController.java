@@ -59,6 +59,30 @@ public class LobController extends BaseController {
 
 		return new IdentityAvailability(isAvailable);
 	}
+	
+	@GetMapping("/lob/confirmLobIdExistenceForUser")
+	public IdentityAvailability confirmLobIdExistenceForUser(@RequestParam(value = "lobId") Long lobId) {
+		
+		Long currentUserId = getCurrentUserId();
+		
+		Boolean isAvailable = lobRepository.existsByIdAndOwnerId(lobId, currentUserId);
+		
+		System.out.println("confirmLobIdExistenceForUser isAvailable ----------------------- > "+isAvailable);
+		
+		return new IdentityAvailability(isAvailable);
+	}
+	
+	@GetMapping("/lob/getAllLobsOwnedByUser")
+	public List<Lob> getAllLobsOwnedByUser() {
+		
+		Long currentUserId = getCurrentUserId();
+		
+		List<Lob> lobs = lobRepository.findByOwnerId(currentUserId);
+		
+		System.out.println("lobs  ----------------------- > "+lobs);
+		
+		return lobs;
+	}
 
 	@PostMapping("/lob/createLobRequest")
 	public ResponseEntity<?> createLobRequest(@Valid @RequestBody CreateLobRequest createLobRequest,

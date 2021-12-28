@@ -125,6 +125,18 @@ public class UserController extends BaseController {
 		return new IdentityExists(isAvailable);
 	}
 	
+	@GetMapping("/user/confirmSubLobLeadExistenceForUser")
+	public IdentityExists confirmSubLobLeadExistenceForUser(@RequestParam(value = "subLobLeadUserName") String subLobLeadUserName) {
+		System.out.println("confirmSubLobLeadExistenceForUser subLobLeadUserName ----------------------- > "+subLobLeadUserName+":"+getCurrentUserId());
+		
+		User subLobLead = userRepository.findByUserName(subLobLeadUserName)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "userName", subLobLeadUserName));
+		
+		Boolean isAvailable = userService.isUserReportingToManager(subLobLead.getId(), getCurrentUserId());
+		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > "+isAvailable);
+		return new IdentityExists(isAvailable);
+	}
+	
 	@GetMapping("/user/getAllReporteesOfCurrentUser")
 	public List<UserListItem> getAllReporteesOfCurrentUser() {
 		List<UserListItem> userList = new ArrayList<UserListItem>();

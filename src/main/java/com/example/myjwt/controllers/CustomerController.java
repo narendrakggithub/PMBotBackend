@@ -73,21 +73,21 @@ public class CustomerController extends BaseController {
 				.orElseThrow(() -> new ResourceNotFoundException("Account", "accountId and userId",
 						createCustomerRequest.getAccountId() + " : " + getCurrentUserId()));
 
-		User lobLeadUser = userRepository.findByUserName(createCustomerRequest.getCustomerLeadUserName())
+		User customerLeadUser = userRepository.findByUserName(createCustomerRequest.getCustomerLeadUserName())
 				.orElseThrow(() -> new ResourceNotFoundException("User", "CustomerLead", createCustomerRequest.getCustomerLeadUserName()));
 
-		if (!userService.isUserReportingToManager(lobLeadUser.getId(), getCurrentUserId())) {
-			return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: Lob lead not reporting to you!"));
+		if (!userService.isUserReportingToManager(customerLeadUser.getId(), getCurrentUserId())) {
+			return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: Customer lead not reporting to you!"));
 		}
 
 		System.out.println(
-				"createLobRequest.getLobLeadId() -------------------------------- " + lobLeadUser.getId());
+				"customerLeadUser.getId() -------------------------------- " + customerLeadUser.getId());
 
-		User owner = userRepository.findById(lobLeadUser.getId())
-				.orElseThrow(() -> new ResourceNotFoundException("User", "LobLead", lobLeadUser.getId()));
+		User owner = userRepository.findById(customerLeadUser.getId())
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Customer Lead", customerLeadUser.getId()));
 
 		System.out.println(
-				"createLobRequest.getLobName() -------------------------------- " + createCustomerRequest.getCustomerName());
+				"createCustomerRequest.getCustomerName() -------------------------------- " + createCustomerRequest.getCustomerName());
 		
 		Customer customer = new Customer();
 
@@ -101,6 +101,6 @@ public class CustomerController extends BaseController {
 		URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/customer/{customerName}")
 				.buildAndExpand(result.getCustomerName()).toUri();
 
-		return ResponseEntity.created(location).body(new ApiResponse(true, "Lob registered successfully!!"));
+		return ResponseEntity.created(location).body(new ApiResponse(true, "Customer registered successfully!!"));
 	}
 }

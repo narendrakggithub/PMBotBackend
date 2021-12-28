@@ -16,5 +16,5 @@ public interface SubLobRepository extends JpaRepository<SubLob, Long> {
 	
 	Boolean existsBySubLobName(String subLobName);
 
-	
+	Boolean existsBySubLobNameAndLobId(String subLobName, Long lobId);
 }

@@ -102,9 +102,25 @@ public class UserController extends BaseController {
 	}
 	
 	@GetMapping("/user/confirmLobLeadExistenceForUser")
-	public IdentityExists confirmLobLeadExistenceForUser(@RequestParam(value = "lobLeadId") Long lobLeadId) {
-		System.out.println("confirmLobLeadExistenceForUser lobLeadId ----------------------- > "+lobLeadId+":"+getCurrentUserId());
-		Boolean isAvailable = userService.isUserReportingToManager(lobLeadId, getCurrentUserId());
+	public IdentityExists confirmLobLeadExistenceForUser(@RequestParam(value = "lobLeadUserNameValue") String lobLeadUserNameValue) {
+		System.out.println("confirmLobLeadExistenceForUser lobLeadUserNameValue ----------------------- > "+lobLeadUserNameValue+":"+getCurrentUserId());
+		
+		User lobLead = userRepository.findByUserName(lobLeadUserNameValue)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "userName", lobLeadUserNameValue));
+		
+		Boolean isAvailable = userService.isUserReportingToManager(lobLead.getId(), getCurrentUserId());
+		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > "+isAvailable);
+		return new IdentityExists(isAvailable);
+	}
+	
+	@GetMapping("/user/confirmCustomerLeadExistenceForUser")
+	public IdentityExists confirmCustomerLeadExistenceForUser(@RequestParam(value = "customerLeadUserName") String customerLeadUserName) {
+		System.out.println("confirmLobLeadExistenceForUser customerLeadUserName ----------------------- > "+customerLeadUserName+":"+getCurrentUserId());
+		
+		User customerLead = userRepository.findByUserName(customerLeadUserName)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "userName", customerLeadUserName));
+		
+		Boolean isAvailable = userService.isUserReportingToManager(customerLead.getId(), getCurrentUserId());
 		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > "+isAvailable);
 		return new IdentityExists(isAvailable);
 	}

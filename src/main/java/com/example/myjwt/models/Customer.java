@@ -25,6 +25,9 @@ public class Customer extends UserDateAudit{
 	@JoinColumn(name = "accountId")
 	Account account;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ownerId")
+	User owner;
 
 	public Customer() {
 
@@ -66,8 +69,11 @@ public class Customer extends UserDateAudit{
 		this.account = account;
 	}
 
+	public User getOwner() {
+		return owner;
+	}
 
-	
-
-
+	public void setOwner(User owner) {
+		this.owner = owner;
+	}
 }

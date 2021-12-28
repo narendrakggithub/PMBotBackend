@@ -53,8 +53,6 @@ public class LobController extends BaseController {
 
 		System.out.println("checkLobNameAvailabilityForUser accountId ----------------------- > " + accountId);
 
-		Long userId = getCurrentUserId();
-
 		Boolean isAvailable = !lobRepository.existsByLobNameAndAccountId(lobName, accountId);
 
 		System.out.println("checkLobNameAvailabilityForUser isAvailable ----------------------- > " + isAvailable);

@@ -179,6 +179,8 @@ public class AuthController {
 		sendVerificationEmail(user, AppConstants.UI_URL, hexCode.getCode());
 		return result;
 	}
+	
+	//TODO: Email exception not reflecting on UI
 
 	private void sendVerificationEmail(User user, String siteURL, String hexCode)
 			throws MessagingException, UnsupportedEncodingException {

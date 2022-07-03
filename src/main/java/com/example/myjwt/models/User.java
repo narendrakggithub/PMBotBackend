@@ -48,9 +48,11 @@ public class User extends DateAudit {
     @JoinColumn(name = "gradeId")
 	private Grade grade;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roleid")
-	private Role role;
+	@ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "userroles",
+    joinColumns = @JoinColumn(name = "userId"),
+    inverseJoinColumns = @JoinColumn(name = "roleId"))
+    private Set<Role> roles = new HashSet<>();
 
 	public User() {
 	}
@@ -120,14 +122,6 @@ public class User extends DateAudit {
 		this.isApproved = isApproved;
 	}
 
-	
-	public Role getRole() {
-		return role;
-	}
-
-	public void setRole(Role role) {
-		this.role = role;
-	}
 
 	public User getManager() {
 		return manager;
@@ -151,6 +145,14 @@ public class User extends DateAudit {
 
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
+	}
+
+	public Set<Role> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(Set<Role> roles) {
+		this.roles = roles;
 	}
 
 	

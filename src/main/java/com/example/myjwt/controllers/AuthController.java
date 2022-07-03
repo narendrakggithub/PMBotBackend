@@ -1,6 +1,7 @@
 package com.example.myjwt.controllers;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -104,22 +105,22 @@ public class AuthController {
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest, HttpServletRequest request)
 			throws UnsupportedEncodingException, MessagingException {
-		if (userRepository.existsByUserName(signUpRequest.getUserName())) {
+		if (userRepository.existsByUserName(signUpRequest.getUserName().trim())) {
 			return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: Username is already exist!"));
 		}
 
-		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+		if (userRepository.existsByEmail(signUpRequest.getEmail().trim())) {
 			return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: Email is already exist!"));
 		}
 
 		User user = new User();
 
 		user.setIsVerified(false);
-		user.setIsActive(false);
+		user.setIsActive(true);
 		user.setIsApproved(false);
-		user.setFullName(signUpRequest.getFullName());
-		user.setUserName(signUpRequest.getUserName());
-		user.setEmail(signUpRequest.getEmail());
+		user.setFullName(signUpRequest.getFullName().trim());
+		user.setUserName(signUpRequest.getUserName().trim());
+		user.setEmail(signUpRequest.getEmail().trim());
 		user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
 		/*
@@ -137,14 +138,13 @@ public class AuthController {
 		 * roles.add(userRole); } }); }
 		 */
 
-		Role userRole = roleRepository.findByName(ERole.Associate)
-				.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+		Role userRole = roleRepository.findByName(ERole.Associate);
 
-		user.setRole(userRole);
+		user.setRoles(Collections.singleton(userRole));
 
-		System.out.println("signUpRequest.getManagerEmail()=" + signUpRequest.getManagerEmail());
+		System.out.println("signUpRequest.getManagerEmail()=" + signUpRequest.getManagerEmail().trim());
 
-		User manager = userRepository.findByEmail(signUpRequest.getManagerEmail());
+		User manager = userRepository.findByEmail(signUpRequest.getManagerEmail().trim());
 
 		if (manager == null) {
 			return ResponseEntity.badRequest().body(new ApiResponse(false, "Error: Manager email doesn't exist!"));
@@ -173,10 +173,13 @@ public class AuthController {
 	@Transactional
 	private User registerTransaction(User user, Hexcode hexCode)
 			throws UnsupportedEncodingException, MessagingException {
+		//TODO: Remove this
+		user.setIsVerified(true);
 		User result = userRepository.save(user);
 		hexCode.setRefId(user.getId());
 		hexCodeRepository.save(hexCode);
-		sendVerificationEmail(user, AppConstants.UI_URL, hexCode.getCode());
+		//TODO: Umcomment this
+		//sendVerificationEmail(user, AppConstants.UI_URL, hexCode.getCode());
 		return result;
 	}
 	

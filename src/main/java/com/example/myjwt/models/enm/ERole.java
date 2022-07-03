@@ -5,6 +5,7 @@ public enum ERole {
 	ProjectManager,
 	SubLOBLead,
 	LOBLead,
+	CustomerLead,
 	EDL,
 	PDL,
 	SBUHead,

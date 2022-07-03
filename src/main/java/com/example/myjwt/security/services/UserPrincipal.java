@@ -24,32 +24,23 @@ public class UserPrincipal implements UserDetails {
 
 	@JsonIgnore
 	private String password;
-	
-	private Long roleId;
 
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public UserPrincipal(Long id, String username, String email, String password, Long roleId, 
+	public UserPrincipal(Long id, String username, String email, String password,
 			Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.username = username;
 		this.email = email;
 		this.password = password;
 		this.authorities = authorities;
-		this.roleId = roleId;
 	}
 
 	public static UserPrincipal build(User user) {
-		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-		authorities.add(new SimpleGrantedAuthority(user.getRole().getName().name()));
-				
+		List<GrantedAuthority> authorities = user.getRoles().stream()
+				.map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
 
-		return new UserPrincipal(
-				user.getId(), 
-				user.getUserName(), 
-				user.getEmail(),
-				user.getPassword(), 
-				user.getRole().getId(),
+		return new UserPrincipal(user.getId(), user.getUserName(), user.getEmail(), user.getPassword(),
 				authorities);
 	}
 
@@ -96,7 +87,6 @@ public class UserPrincipal implements UserDetails {
 		return true;
 	}
 
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -106,18 +96,31 @@ public class UserPrincipal implements UserDetails {
 		UserPrincipal user = (UserPrincipal) o;
 		return Objects.equals(id, user.id);
 	}
-	
+
 	@Override
-    public int hashCode() {
+	public int hashCode() {
 
-        return Objects.hash(id);
-    }
-
-	public Long getRoleId() {
-		return roleId;
+		return Objects.hash(id);
 	}
 
-	public void setRoleId(Long roleId) {
-		this.roleId = roleId;
+	public void setId(Long id) {
+		this.id = id;
 	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+		this.authorities = authorities;
+	}
+
 }

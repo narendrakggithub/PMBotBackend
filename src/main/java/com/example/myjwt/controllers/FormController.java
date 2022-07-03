@@ -59,8 +59,7 @@ public class FormController {
 	@Autowired
 	AuthenticationManager authenticationManager;
 
-	@Autowired
-	UserRepository userRepository;
+	
 
 	@Autowired
 	HexCodeRepository hexCodeRepository;
@@ -74,47 +73,12 @@ public class FormController {
 	@Autowired
 	PasswordEncoder encoder;
 	
-	@Autowired
-	private CustomUserDetailsService userDetailsService;
+	
 
 	@Autowired
 	private JavaMailSender mailSender;
 
-	@Autowired
-	JwtTokenProvider jwtUtils;
+	
 
-	@PostMapping("/createproject")
-	public ResponseEntity<?> createProject(@Valid @RequestBody CreateProjectRequest createProjectRequest,
-			HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {
-
-		Long userId = PMUtils.getUserIdFromRequest(request, jwtUtils, userDetailsService);
-		
-		System.out.println("userId--------------------------------------->:"+userId);
-
-		if (userId==null) {
-			return ResponseEntity.badRequest().body(new ApiResponse(false, "User doesn't exist"));
-		}
-
-		Project project = new Project();
-		
-		
-		User user = userRepository.findById(userId).orElseThrow(
-				() -> new UsernameNotFoundException("User Not Found with userid: " + userId));
-		
-		User projectManager = userRepository.findByUserName(createProjectRequest.getPmName()).orElseThrow(
-				() -> new UsernameNotFoundException("Project Manager Not Found with name: " + createProjectRequest.getPmName()));
-		
-		project.setCustomer(null);
-		project.setEndDate(createProjectRequest.getEndDate());
-		project.setIsActive(true);
-		project.setProjectManager(projectManager);
-		project.setProjectName(createProjectRequest.getProjectName());
-		project.setStartDate(createProjectRequest.getStartDate());
-		project.setSubLob(null);
-		
-		projectRepository.save(project);
-
-		return ResponseEntity
-				.ok(new ApiResponse(true, "Project added successfully!"));
-	}
+	
 }

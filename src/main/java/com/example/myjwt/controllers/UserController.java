@@ -1,24 +1,31 @@
 package com.example.myjwt.controllers;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.example.myjwt.exception.ResourceNotFoundException;
+import com.example.myjwt.models.Grade;
 import com.example.myjwt.models.User;
 import com.example.myjwt.payload.IdentityAvailability;
 import com.example.myjwt.payload.IdentityExists;
 import com.example.myjwt.payload.NativeQueryUser;
+import com.example.myjwt.payload.UpdateResult;
 import com.example.myjwt.payload.UserIdentityAvailability;
 import com.example.myjwt.payload.UserListItem;
 import com.example.myjwt.payload.UserProfile;
 import com.example.myjwt.payload.UserSummary;
+import com.example.myjwt.payload.response.ApiResponse;
+import com.example.myjwt.repo.GradeRepository;
 import com.example.myjwt.repo.SbuRepository;
 import com.example.myjwt.repo.UserRepository;
 import com.example.myjwt.security.CurrentUser;
@@ -33,19 +40,22 @@ public class UserController extends BaseController {
 
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private SbuRepository sbuRepository;
+
+	@Autowired
+	private GradeRepository gradeRepository;
 
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
 	@GetMapping("/user/me")
 	public UserSummary getCurrentUser(@CurrentUser UserPrincipal currentUser) {
 		UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(),
-				currentUser.getRoleId());
+				currentUser.getAuthorities());
 		return userSummary;
 	}
 
@@ -80,15 +90,15 @@ public class UserController extends BaseController {
 
 	@GetMapping("/user/confirmSBUNameExistence")
 	public IdentityExists confirmSBUNameExistence(@RequestParam(value = "sbuName") String sbuName) {
-		Boolean isAvailable = sbuRepository.findBySbuHeadIdAndSbuName(getCurrentUserId(), sbuName).size()>0;
+		Boolean isAvailable = sbuRepository.findBySbuHeadIdAndSbuName(getCurrentUserId(), sbuName).size() > 0;
 		return new IdentityExists(isAvailable);
 	}
 
 	@GetMapping("/user/confirmPDLUserExistence")
 	public IdentityExists confirmPDLUserExistence(@RequestParam(value = "pdlUserName") String pdlUserName) {
 		List<Long> eligibleGrades = PMUtils.getPDLEligibleGrades();
-		Boolean isAvailable = userRepository.getUserWithGradeOwnedByCurrentUser(getCurrentUserId(), pdlUserName,
-				eligibleGrades).size()>0;
+		Boolean isAvailable = userRepository
+				.getUserWithGradeOwnedByCurrentUser(getCurrentUserId(), pdlUserName, eligibleGrades).size() > 0;
 		return new IdentityExists(isAvailable);
 	}
 
@@ -96,57 +106,94 @@ public class UserController extends BaseController {
 	public IdentityExists confirmEDLUserExistence(@RequestParam(value = "edlUserName") String edlUserName) {
 		List<Long> eligibleGrades = PMUtils.getEDLEligibleGrades();
 
-		Boolean isAvailable = userRepository.getUserWithGradeOwnedByCurrentUser(getCurrentUserId(), edlUserName,
-				eligibleGrades).size()>0;
+		Boolean isAvailable = userRepository
+				.getUserWithGradeOwnedByCurrentUser(getCurrentUserId(), edlUserName, eligibleGrades).size() > 0;
 		return new IdentityExists(isAvailable);
 	}
-	
+
 	@GetMapping("/user/confirmLobLeadExistenceForUser")
-	public IdentityExists confirmLobLeadExistenceForUser(@RequestParam(value = "lobLeadUserNameValue") String lobLeadUserNameValue) {
-		System.out.println("confirmLobLeadExistenceForUser lobLeadUserNameValue ----------------------- > "+lobLeadUserNameValue+":"+getCurrentUserId());
-		
+	public IdentityExists confirmLobLeadExistenceForUser(
+			@RequestParam(value = "lobLeadUserNameValue") String lobLeadUserNameValue) {
+		System.out.println("confirmLobLeadExistenceForUser lobLeadUserNameValue ----------------------- > "
+				+ lobLeadUserNameValue + ":" + getCurrentUserId());
+
 		User lobLead = userRepository.findByUserName(lobLeadUserNameValue)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "userName", lobLeadUserNameValue));
-		
+
 		Boolean isAvailable = userService.isUserReportingToManager(lobLead.getId(), getCurrentUserId());
-		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > "+isAvailable);
+		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > " + isAvailable);
 		return new IdentityExists(isAvailable);
 	}
-	
+
 	@GetMapping("/user/confirmCustomerLeadExistenceForUser")
-	public IdentityExists confirmCustomerLeadExistenceForUser(@RequestParam(value = "customerLeadUserName") String customerLeadUserName) {
-		System.out.println("confirmLobLeadExistenceForUser customerLeadUserName ----------------------- > "+customerLeadUserName+":"+getCurrentUserId());
-		
+	public IdentityExists confirmCustomerLeadExistenceForUser(
+			@RequestParam(value = "customerLeadUserName") String customerLeadUserName) {
+		System.out.println("confirmLobLeadExistenceForUser customerLeadUserName ----------------------- > "
+				+ customerLeadUserName + ":" + getCurrentUserId());
+
 		User customerLead = userRepository.findByUserName(customerLeadUserName)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "userName", customerLeadUserName));
-		
+
 		Boolean isAvailable = userService.isUserReportingToManager(customerLead.getId(), getCurrentUserId());
-		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > "+isAvailable);
+		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > " + isAvailable);
 		return new IdentityExists(isAvailable);
 	}
-	
+
 	@GetMapping("/user/confirmSubLobLeadExistenceForUser")
-	public IdentityExists confirmSubLobLeadExistenceForUser(@RequestParam(value = "subLobLeadUserName") String subLobLeadUserName) {
-		System.out.println("confirmSubLobLeadExistenceForUser subLobLeadUserName ----------------------- > "+subLobLeadUserName+":"+getCurrentUserId());
-		
+	public IdentityExists confirmSubLobLeadExistenceForUser(
+			@RequestParam(value = "subLobLeadUserName") String subLobLeadUserName) {
+		System.out.println("confirmSubLobLeadExistenceForUser subLobLeadUserName ----------------------- > "
+				+ subLobLeadUserName + ":" + getCurrentUserId());
+
 		User subLobLead = userRepository.findByUserName(subLobLeadUserName)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "userName", subLobLeadUserName));
-		
+
 		Boolean isAvailable = userService.isUserReportingToManager(subLobLead.getId(), getCurrentUserId());
-		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > "+isAvailable);
+		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > " + isAvailable);
 		return new IdentityExists(isAvailable);
 	}
-	
+
+	@GetMapping("/user/confirmProjectManagerAvailabilityForUser")
+	public IdentityExists confirmProjectManagerAvailabilityForUser(
+			@RequestParam(value = "pmUserNameValue") String pmUserNameValue) {
+		String pmUserName = pmUserNameValue.trim();
+		System.out.println("confirmProjectManagerAvailabilityForUser pmUserNameValue ----------------------- > "
+				+ pmUserNameValue + ":" + getCurrentUserId());
+
+		User pmUser = userRepository.findByUserName(pmUserNameValue)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "userName", pmUserName));
+
+		Boolean isAvailable = userService.isUserReportingToManager(pmUser.getId(), getCurrentUserId());
+		System.out.println("confirmLobLeadExistenceForUser isAvailable ----------------------- > " + isAvailable);
+		return new IdentityExists(isAvailable);
+	}
+
 	@GetMapping("/user/getAllReporteesOfCurrentUser")
 	public List<UserListItem> getAllReporteesOfCurrentUser() {
 		List<UserListItem> userList = new ArrayList<UserListItem>();
 		List<NativeQueryUser> allReportees = userService.getAllReporteesOf(getCurrentUserId());
 		
+		System.out.println("allReportees.size()="+allReportees.size());
+
 		for (int i = 0; i < allReportees.size(); i++) {
 			userList.add(new UserListItem(allReportees.get(i)));
 		}
-		System.out.println("getAllReporteesOfCurrentUser userList size----------------------- > "+userList.size());
-		System.out.println("getAllReporteesOfCurrentUser userList ----------------------- > "+userList);
+
+		return userList;
+	}
+
+	@GetMapping("/user/getAllAssociates")
+	public List<UserListItem> getAllAssociates() {
+		List<UserListItem> userList = new ArrayList<UserListItem>();
+
+		// TODO: Replace all find All
+		List<User> allAssociates = userRepository.findByIsActive(true);
+
+		for (int i = 0; i < allAssociates.size(); i++) {
+			userList.add(new UserListItem(allAssociates.get(i), true));
+		}
+		System.out.println("getAllAssociates userList size----------------------- > " + userList.size());
+		System.out.println("getAllAssociates userList ----------------------- > " + userList);
 
 		return userList;
 	}
@@ -154,31 +201,137 @@ public class UserController extends BaseController {
 	// select managerID, group_concat(userID) from hierarchy group by managerID ;
 	@GetMapping("/user/getAllEDLUserNamesOwnedByUser")
 	public List<UserListItem> getAllEDLUserNamesOwnedByUser() {
+		List<NativeQueryUser> allReportees = userService.getAllReporteesOf(getCurrentUserId());
+
 		List<Long> eligibleGrades = PMUtils.getEDLEligibleGrades();
+		List<UserListItem> eligibleEDLs = new ArrayList<UserListItem>();
 
-		List<User> edlList = userRepository.findByManagerAndGradeIds(getCurrentUserId(), eligibleGrades);
-
-		List<UserListItem> userList = new ArrayList<UserListItem>();
-		for (int i = 0; i < edlList.size(); i++) {
-			userList.add(new UserListItem(edlList.get(i)));
+		for (NativeQueryUser nativeQueryUser : allReportees) {
+			if (eligibleGrades.contains(nativeQueryUser.getGradeId())) {
+				UserListItem listItem = new UserListItem(nativeQueryUser);
+				eligibleEDLs.add(listItem);
+			}
 		}
 
-		return userList;
+		return eligibleEDLs;
 	}
 
 	// select managerID, group_concat(userID) from hierarchy group by managerID ;
 	@GetMapping("/user/getAllPDLUserNamesOwnedByUser")
 	public List<UserListItem> getAllPDLUserNamesOwnedByUser() {
+		List<NativeQueryUser> allReportees = userService.getAllReporteesOf(getCurrentUserId());
+
 		List<Long> eligibleGrades = PMUtils.getPDLEligibleGrades();
+		List<UserListItem> eligiblePDLs = new ArrayList<UserListItem>();
 
-		List<User> edlList = userRepository.findByManagerAndGradeIds(getCurrentUserId(), eligibleGrades);
-
-		List<UserListItem> userList = new ArrayList<UserListItem>();
-		for (int i = 0; i < edlList.size(); i++) {
-			userList.add(new UserListItem(edlList.get(i)));
+		for (NativeQueryUser nativeQueryUser : allReportees) {
+			if (eligibleGrades.contains(nativeQueryUser.getGradeId())) {
+				UserListItem listItem = new UserListItem(nativeQueryUser);
+				eligiblePDLs.add(listItem);
+			}
 		}
 
-		return userList;
+		System.out.println("eligiblePDLs.size() == " + eligiblePDLs.size());
+
+		return eligiblePDLs;
+	}
+
+	// select managerID, group_concat(userID) from hierarchy group by managerID ;
+	@GetMapping("/user/getNewUsersToApprove")
+	public List<UserListItem> getNewUsersToApprove() {
+		Long currentUserId = getCurrentUserId();
+		List<User> userList = userRepository.findByManagerIdAndIsApprovedAndIsVerified(currentUserId, false, true);
+		List<UserListItem> userItemList = new ArrayList<UserListItem>();
+		for (User item : userList) {
+			userItemList.add(new UserListItem(item, true));
+		}
+
+		return userItemList;
+	}
+
+	@GetMapping("/user/updateGradeForAssociate")
+	public ResponseEntity<?> updateGradeForAssociate(
+			@RequestParam(value = "gradeSelectedValue") Long gradeSelectedValue,
+			@RequestParam(value = "userName") String userName) {
+
+		System.out.println("gradeSelectedValue --------------------> " + gradeSelectedValue);
+
+		User user = userRepository.findByUserName(userName)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "userName", userName));
+
+		Long currentUserId = getCurrentUserId();
+		if (!user.getManager().getId().equals(currentUserId)) {
+			return ResponseEntity.badRequest()
+					.body(new ApiResponse(false, "Error: You are not the reporting manager for this associate!"));
+		}
+
+		Grade grade = gradeRepository.findById(gradeSelectedValue)
+				.orElseThrow(() -> new ResourceNotFoundException("Grade", "id", gradeSelectedValue));
+
+		user.setGrade(grade);
+		User result = userRepository.save(user);
+
+		URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/users/{username}")
+				.buildAndExpand(result.getUserName()).toUri();
+
+		System.out.println("saved --------------------> " + gradeSelectedValue);
+
+		return ResponseEntity.created(location).body(new ApiResponse(true, "Grade saved"));
+	}
+
+	@GetMapping("/user/updateManagerForAssociate")
+	public ResponseEntity<?> updateManagerForAssociate(@RequestParam(value = "managerUsername") String managerUsername,
+			@RequestParam(value = "userName") String userName) {
+
+		System.out.println("managerUsername --------------------> " + managerUsername);
+
+		User manager = userRepository.findByUserName(managerUsername)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "managerUsername", managerUsername));
+
+		User user = userRepository.findByUserName(userName)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "userName", userName));
+
+		Long currentUserId = getCurrentUserId();
+		if (!user.getManager().getId().equals(currentUserId) && !user.getManager().getId().equals(currentUserId)) {
+			return ResponseEntity.badRequest()
+					.body(new ApiResponse(false, "Error: You are not the reporting manager for this associate!"));
+		}
+
+		user.setManager(manager);
+		User result = userRepository.save(user);
+
+		URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/users/{username}")
+				.buildAndExpand(result.getUserName()).toUri();
+
+		System.out.println("saved --------------------> " + managerUsername);
+
+		return ResponseEntity.created(location).body(new ApiResponse(true, "Manager updated"));
+	}
+
+	@GetMapping("/user/approveAssociateLogin")
+	public ResponseEntity<?> approveAssociateLogin(@RequestParam(value = "userName") String userName,
+			@RequestParam(value = "flag") Boolean flag) {
+
+		System.out.println("userName --------------------> " + flag + ":" + userName);
+
+		User user = userRepository.findByUserName(userName)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "userName", userName));
+
+		Long currentUserId = getCurrentUserId();
+		if (!user.getManager().getId().equals(currentUserId)) {
+			return ResponseEntity.badRequest()
+					.body(new ApiResponse(false, "Error: You are not the reporting manager for this associate!"));
+		}
+
+		user.setIsApproved(flag);
+		User result = userRepository.save(user);
+
+		URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/users/{username}")
+				.buildAndExpand(result.getUserName()).toUri();
+
+		System.out.println("saved --------------------> " + userName);
+
+		return ResponseEntity.created(location).body(new ApiResponse(true, "Grade saved"));
 	}
 
 }

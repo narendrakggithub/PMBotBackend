@@ -7,26 +7,20 @@ import javax.validation.constraints.*;
  
 public class CreateProjectRequest {
     @NotBlank
-    @Size(min = 10, max = 50)
+    @Size(min = 10, max = 50, message = "Project name should be between 10 and 50 range")
     private String projectName;
     
-    @NotBlank
     private Date startDate;
     
-    @NotBlank
     private Date endDate;
     
     @NotBlank
-    @Size(min = 3, max = 20)
-    private String pmName;
+    @Size(min = 3, max = 20, message = "Username should be between 3 and 20 range")
+    private String pmUserName;
     
-    @NotBlank
-    @Size(min = 3, max = 20)
-    private String subLobName;
-    
-    @NotBlank
-    @Size(min = 3, max = 20)
-    private String customerName;
+    private Long subLobId;
+
+    private Long customerId;
 
 	public String getProjectName() {
 		return projectName;
@@ -52,28 +46,28 @@ public class CreateProjectRequest {
 		this.endDate = endDate;
 	}
 
-	public String getPmName() {
-		return pmName;
+	public String getPmUserName() {
+		return pmUserName;
 	}
 
-	public void setPmName(String pmName) {
-		this.pmName = pmName;
+	public void setPmUserName(String pmUserName) {
+		this.pmUserName = pmUserName;
 	}
 
-	public String getSubLobName() {
-		return subLobName;
+	public Long getSubLobId() {
+		return subLobId;
 	}
 
-	public void setSubLobName(String subLobName) {
-		this.subLobName = subLobName;
+	public void setSubLobId(Long subLobId) {
+		this.subLobId = subLobId;
 	}
 
-	public String getCustomerName() {
-		return customerName;
+	public Long getCustomerId() {
+		return customerId;
 	}
 
-	public void setCustomerName(String customerName) {
-		this.customerName = customerName;
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
 	}
     
 }

@@ -10,5 +10,5 @@ import com.example.myjwt.models.enm.ERole;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
-	Optional<Role> findByName(ERole name);
+	Role findByName(ERole name);
 }

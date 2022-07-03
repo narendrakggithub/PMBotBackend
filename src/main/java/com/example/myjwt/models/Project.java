@@ -20,10 +20,8 @@ public class Project extends UserDateAudit{
 	@Size(max = 20)
 	private String projectName;
 	
-	@NotBlank
 	private Date startDate;
 	
-	@NotBlank
 	private Date endDate;
 	
 	private Boolean isActive;

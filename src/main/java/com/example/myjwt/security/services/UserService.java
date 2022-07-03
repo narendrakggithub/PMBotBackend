@@ -41,13 +41,23 @@ public class UserService {
 
 		return allReportees;
 	}
-	
+
 	public boolean isUserReportingToManager(Long userId, Long managerId) {
 		List<NativeQueryUser> allReportees = getAllReporteesOf(managerId);
+
+		System.out.println("allReportees ==== " + allReportees);
+
+		for (NativeQueryUser nativeQueryUser : allReportees) {
+			System.out
+					.println("id, managerId ======= " + nativeQueryUser.getId() + ":" + nativeQueryUser.getManagerId());
+
+		}
+
 		Boolean isAvailable = false;
-		for(NativeQueryUser nativeQueryUser: allReportees) {
-			System.out.println("user.getId().longValue() == managerId.longValue(): "+nativeQueryUser.getId().longValue()+":"+managerId.longValue());
-			if(nativeQueryUser.getManagerId().longValue() == managerId.longValue()) {
+		for (NativeQueryUser nativeQueryUser : allReportees) {
+			System.out.println("user.getId().longValue() == managerId.longValue(): "
+					+ nativeQueryUser.getId().longValue() + ":" + managerId.longValue());
+			if (nativeQueryUser.getManagerId().longValue() == managerId.longValue()) {
 				isAvailable = true;
 				break;
 			}

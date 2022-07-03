@@ -17,19 +17,18 @@ public class NativeQueryUser {
 	private String userName;
 	private Long gradeId;
 	private Long managerId;
-	private Long roleid;
 
 	public NativeQueryUser() {
 
 	}
 
 	public NativeQueryUser(Object[] arrValues) {
-		
+
 		//// s.id, s.created_at, s.updated_at, s.email, s.full_name, s.is_active,
 		//// s.is_approved, s.is_verified, s.password, s.user_name, s.grade_id,
 		//// s.manager_id, s.roleid
-		
-		int i=0;
+
+		int i = 0;
 		setId(Long.parseLong(arrValues[i++].toString()));
 		setCreatedAt(PMUtils.stringToSQLDate(arrValues[i++].toString()));
 		setUpdatedAt(PMUtils.stringToSQLDate(arrValues[i++].toString()));
@@ -40,10 +39,16 @@ public class NativeQueryUser {
 		setIsVerified(Boolean.parseBoolean(arrValues[i++].toString()));
 		setPassword(arrValues[i++].toString());
 		setUserName(arrValues[i++].toString());
-		setGradeId(Long.parseLong(arrValues[i++].toString()));
-		setManagerId(Long.parseLong(arrValues[i++].toString()));
-		setRoleid(Long.parseLong(arrValues[i++].toString()));
-
+		if (arrValues[i] != null) {
+			setGradeId(Long.parseLong(arrValues[i++].toString()));
+		} else {
+			i++;
+		}
+		if (arrValues[i] != null) {
+			setManagerId(Long.parseLong(arrValues[i++].toString()));
+		} else {
+			i++;
+		}
 	}
 
 	public Long getId() {
@@ -141,13 +146,4 @@ public class NativeQueryUser {
 	public void setManagerId(Long managerId) {
 		this.managerId = managerId;
 	}
-
-	public Long getRoleid() {
-		return roleid;
-	}
-
-	public void setRoleid(Long roleid) {
-		this.roleid = roleid;
-	}
-
 }
